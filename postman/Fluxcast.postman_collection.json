@@ -67,7 +67,23 @@
                 "register"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST /auth/login",
@@ -96,7 +112,23 @@
                 "login"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /auth/me",
@@ -173,7 +205,23 @@
                 "plants"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('plantId', json.id);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /plants/:plantId",

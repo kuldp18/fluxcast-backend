@@ -1,9 +1,12 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import crypto from 'node:crypto';
 import { Plant } from '../models/Plant.js';
 import { Telemetry } from '../models/Telemetry.js';
 import { WeatherSnapshot } from '../models/WeatherSnapshot.js';
 import { getReconciledWeather } from '../services/weather/weatherService.js';
+import { ForecastResult } from '../models/ForecastResult.js';
+import { ForecastJob } from '../models/ForecastJob.js';
 
 const router = express.Router();
 
@@ -180,6 +183,70 @@ router.get('/:plantId/weather', async (req, res, next) => {
     });
 
     return res.status(200).json(doc.toJSON());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get('/:plantId/forecast', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const horizon = Number(req.query.horizon || 24);
+    if (![24, 48, 72].includes(horizon)) {
+      return res.status(400).json({ error: true, message: 'Invalid horizon' });
+    }
+
+    const plantExists = await Plant.exists({ _id: plantId });
+    if (!plantExists) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    let doc = await ForecastResult.findOne({ plantId, horizonHours: horizon }).sort({
+      generatedAt: -1,
+    });
+
+    if (!doc) return res.status(404).json({ error: true, message: 'Resource not found' });
+
+    return res.status(200).json(doc.toJSON());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.post('/:plantId/forecast', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const horizon = Number(req.body?.horizon || 24);
+    if (![24, 48, 72].includes(horizon)) {
+      return res.status(400).json({ error: true, message: 'Invalid horizon' });
+    }
+
+    const plant = await Plant.findById(plantId).lean();
+    if (!plant) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const jobId = crypto.randomUUID();
+
+    // Record the job. A worker/graph should pick this up and persist ForecastResult.
+    // We intentionally do not generate "dummy" forecasts here.
+    await ForecastJob.create({
+      _id: jobId,
+      plantId,
+      horizonHours: horizon,
+      status: 'queued',
+      createdAt: new Date(),
+    });
+
+    return res.status(202).json({ jobId, status: 'queued' });
   } catch (err) {
     return next(err);
   }

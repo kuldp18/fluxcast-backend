@@ -21,7 +21,18 @@ async function fetchMosdacHourly() {
     };
   }
 
-  const resp = await axios.get(url, { timeout: 15_000 });
+  const apiKey = process.env.MOSDAC_API_KEY;
+  const headerName = process.env.MOSDAC_API_KEY_HEADER || 'Authorization';
+  const headerValue = apiKey
+    ? headerName.toLowerCase() === 'authorization'
+      ? `Bearer ${apiKey}`
+      : apiKey
+    : undefined;
+
+  const resp = await axios.get(url, {
+    timeout: 15_000,
+    headers: headerValue ? { [headerName]: headerValue } : undefined,
+  });
   const hourly = resp.data?.hourly || resp.data?.data?.hourly || [];
   return {
     source: 'mosdac',

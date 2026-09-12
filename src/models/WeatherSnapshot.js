@@ -5,6 +5,12 @@ const WeatherHourlySchema = new mongoose.Schema(
     time: { type: Date, required: true },
     cloudCoverPct: { type: Number },
     ghiWm2: { type: Number },
+    // Internal-only: global tilted irradiance (if requested from Open-Meteo).
+    gtiWm2: { type: Number },
+    // Internal-only: precipitation amount and radiation components
+    precipitationMm: { type: Number },
+    directRadiationWm2: { type: Number },
+    diffuseRadiationWm2: { type: Number },
     dniWm2: { type: Number },
     rainProbabilityPct: { type: Number },
     temperatureC: { type: Number },
@@ -34,10 +40,15 @@ WeatherSnapshotSchema.set('toJSON', {
     delete ret.createdAt;
     delete ret.updatedAt;
 
-    ret.hourly = (ret.hourly || []).map((h) => ({
-      ...h,
-      time: new Date(h.time).toISOString(),
-    }));
+    ret.hourly = (ret.hourly || []).map((h) => {
+      const out = { ...h, time: new Date(h.time).toISOString() };
+      // Don't expose internal-only fields.
+      delete out.gtiWm2;
+      delete out.precipitationMm;
+      delete out.directRadiationWm2;
+      delete out.diffuseRadiationWm2;
+      return out;
+    });
 
     return ret;
   },

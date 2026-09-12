@@ -1,6 +1,13 @@
 const FIELDS = [
   'cloudCoverPct',
   'ghiWm2',
+  // Internal PV proxy (from Open-Meteo GTI when panel geometry provided).
+  // This is persisted but stripped from API responses.
+  'gtiWm2',
+  // Internal extras
+  'precipitationMm',
+  'directRadiationWm2',
+  'diffuseRadiationWm2',
   'dniWm2',
   'rainProbabilityPct',
   'temperatureC',

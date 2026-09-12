@@ -14,13 +14,15 @@ async function safeFetch(name, weight, fn) {
 }
 
 /**
- * @param {{ latitude: number, longitude: number, hours: number }} params
+ * @param {{ latitude: number, longitude: number, hours: number, elevation?: number }} params
  */
-async function getReconciledWeather({ latitude, longitude, hours }) {
+async function getReconciledWeather({ latitude, longitude, hours, elevation }) {
   const horizon = Math.max(1, Math.min(72, Number(hours || 72)));
 
   const [openMeteo, mosdac, nasa] = await Promise.all([
-    safeFetch('open-meteo', 0.55, () => fetchOpenMeteoHourly({ latitude, longitude, hours: horizon })),
+    safeFetch('open-meteo', 0.55, () =>
+      fetchOpenMeteoHourly({ latitude, longitude, hours: horizon, elevation })
+    ),
     safeFetch('mosdac', 0.25, () => fetchMosdacHourly({ latitude, longitude, hours: horizon })),
     safeFetch('nasa-power', 0.2, () => fetchNasaPowerHourly({ latitude, longitude, hours: horizon })),
   ]);

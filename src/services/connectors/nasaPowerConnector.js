@@ -36,7 +36,8 @@ async function fetchNasaPowerHourly({ latitude, longitude, hours }) {
     'ALLSKY_SFC_SW_DWN',
   ].join(',');
 
-  const url = 'https://power.larc.nasa.gov/api/temporal/hourly/point';
+  const url =
+    process.env.NASA_POWER_BASE_URL || 'https://power.larc.nasa.gov/api/temporal/hourly/point';
   const resp = await axios.get(url, {
     timeout: 15_000,
     params: {

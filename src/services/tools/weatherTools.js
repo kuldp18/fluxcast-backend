@@ -8,6 +8,7 @@ const weatherInputSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   hours: z.number().int().min(1).max(72).default(72),
+  elevation: z.number().optional(),
 });
 
 const openMeteoTool = tool(

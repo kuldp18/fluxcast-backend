@@ -10,7 +10,12 @@ import { mongoose } from './config/db.js';
 function createApp() {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      // Make sure browser clients can send Bearer tokens.
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+  );
   app.use(express.json({ limit: '1mb' }));
 
   // Outside of /v1: deployment health check.
