@@ -1,0 +1,503 @@
+{
+  "info": {
+    "name": "Fluxcast Backend API",
+    "description": "Postman collection for Fluxcast backend routes (from openapi.yaml + /health).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "plantId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alertId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"changeme\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plants",
+      "item": [
+        {
+          "name": "GET /plants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants?type=solar&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "solar",
+                  "description": "Filter by plant type (solar|wind)",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /plants",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bhuj Solar Farm 1\",\n  \"type\": \"solar\",\n  \"latitude\": 23.241999,\n  \"longitude\": 69.666932,\n  \"capacityMW\": 50,\n  \"commissionedDate\": \"2026-01-01\",\n  \"solarSpec\": {\n    \"panelTiltDeg\": 20,\n    \"panelAzimuthDeg\": 180\n  },\n  \"hasLimitedHistory\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /plants/:plantId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /plants/:plantId",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bhuj Solar Farm 1 (Updated)\",\n  \"type\": \"solar\",\n  \"latitude\": 23.241999,\n  \"longitude\": 69.666932,\n  \"capacityMW\": 55\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /plants/:plantId",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /plants/:plantId/telemetry",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/telemetry?days=4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "4"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /plants/:plantId/telemetry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": \"2026-09-12T10:00:00.000Z\",\n  \"generationMW\": 12.34,\n  \"sensorStatus\": \"ok\",\n  \"outage\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/telemetry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "telemetry"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "item": [
+        {
+          "name": "GET /plants/:plantId/weather",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/weather?hours=72",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "weather"
+              ],
+              "query": [
+                {
+                  "key": "hours",
+                  "value": "72"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forecasts",
+      "item": [
+        {
+          "name": "GET /plants/:plantId/forecast",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/forecast?horizon=24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "forecast"
+              ],
+              "query": [
+                {
+                  "key": "horizon",
+                  "value": "24"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /plants/:plantId/forecast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horizon\": 24\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/forecast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "forecast"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "GET /plants/:plantId/recommendation",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/recommendation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "recommendation"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /plants/:plantId/explain",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/explain",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plants",
+                "{{plantId}}",
+                "explain"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Simulation",
+      "item": [
+        {
+          "name": "POST /simulate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plantId\": \"{{plantId}}\",\n  \"scenario\": \"What if demand increases 10% and this turbine goes offline for 6 hours?\",\n  \"overrides\": {\n    \"demandChangePct\": 10,\n    \"plantOutageHours\": 6\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "GET /alerts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/alerts?severity=high&plantId={{plantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "severity",
+                  "value": "high",
+                  "disabled": true
+                },
+                {
+                  "key": "plantId",
+                  "value": "{{plantId}}",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /alerts/:alertId/acknowledge",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/alerts/{{alertId}}/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts",
+                "{{alertId}}",
+                "acknowledge"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "item": [
+        {
+          "name": "GET /portfolio/forecast",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/portfolio/forecast?horizon=24&plantIds=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portfolio",
+                "forecast"
+              ],
+              "query": [
+                {
+                  "key": "horizon",
+                  "value": "24"
+                },
+                {
+                  "key": "plantIds",
+                  "value": "",
+                  "description": "Comma-separated list of plant IDs; omit for all plants",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internal",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

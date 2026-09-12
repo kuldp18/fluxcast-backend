@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { Plant } from '../models/Plant.js';
 import { Telemetry } from '../models/Telemetry.js';
+import { WeatherSnapshot } from '../models/WeatherSnapshot.js';
+import { getReconciledWeather } from '../services/weather/weatherService.js';
 
 const router = express.Router();
 
@@ -143,6 +145,41 @@ router.post('/:plantId/telemetry', async (req, res, next) => {
 
     await Telemetry.create(payload);
     return res.status(201).send();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get('/:plantId/weather', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const plant = await Plant.findById(plantId).lean();
+    if (!plant) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const hours = Math.max(1, Math.min(72, Number(req.query.hours || 72)));
+
+    const { source, hourly } = await getReconciledWeather({
+      latitude: plant.latitude,
+      longitude: plant.longitude,
+      hours,
+    });
+
+    const doc = await WeatherSnapshot.create({
+      plantId,
+      source,
+      hourly: (hourly || []).map((h) => ({
+        ...h,
+        time: new Date(h.time),
+      })),
+    });
+
+    return res.status(200).json(doc.toJSON());
   } catch (err) {
     return next(err);
   }

@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { fetchOpenMeteoHourly } from '../connectors/openMeteoConnector.js';
 import { fetchMosdacHourly } from '../connectors/mosdacConnector.js';
-import { fetchNasaGisHourly } from '../connectors/nasaConnector.js';
+import { fetchNasaPowerHourly } from '../connectors/nasaPowerConnector.js';
 
 const weatherInputSchema = z.object({
   latitude: z.number(),
@@ -37,14 +37,15 @@ const mosdacTool = tool(
 );
 
 const nasaGisTool = tool(
-  async () => {
-    const out = await fetchNasaGisHourly();
+  async (input) => {
+    // Best-effort using NASA POWER hourly endpoint.
+    const out = await fetchNasaPowerHourly(input);
     return JSON.stringify(out);
   },
   {
     name: 'nasaGisTool',
     description:
-      'Fetch supporting NASA GIS layer weather data for a location. Currently a stub returning an empty dataset so workflows can fall back.',
+      'Fetch supporting NASA satellite/model weather data for a location (best-effort via NASA POWER).',
     schema: weatherInputSchema,
   }
 );
