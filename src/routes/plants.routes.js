@@ -1,0 +1,151 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import { Plant } from '../models/Plant.js';
+import { Telemetry } from '../models/Telemetry.js';
+
+const router = express.Router();
+
+router.get('/', async (req, res, next) => {
+  try {
+    const { type } = req.query;
+    const page = Math.max(1, Number(req.query.page || 1));
+    const limit = Math.max(1, Math.min(100, Number(req.query.limit || 20)));
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (type) filter.type = type;
+
+    const [total, plants] = await Promise.all([
+      Plant.countDocuments(filter),
+      Plant.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    ]);
+
+    return res.status(200).json({ total, plants: plants.map((p) => p.toJSON()) });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.post('/', async (req, res, next) => {
+  try {
+    const plant = await Plant.create(req.body);
+    return res.status(201).json(plant.toJSON());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get('/:plantId', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const plant = await Plant.findById(plantId);
+    if (!plant) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    return res.status(200).json(plant.toJSON());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.patch('/:plantId', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const plant = await Plant.findByIdAndUpdate(plantId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!plant) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    return res.status(200).json(plant.toJSON());
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.delete('/:plantId', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const plant = await Plant.findByIdAndDelete(plantId);
+    if (!plant) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    return res.status(204).send();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get('/:plantId/telemetry', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const days = Math.max(1, Math.min(30, Number(req.query.days || 4)));
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+    const points = await Telemetry.find({ plantId, timestamp: { $gte: since } })
+      .sort({ timestamp: 1 })
+      .lean();
+
+    // Response shape must match TelemetryPoint (no plantId field).
+    return res.status(200).json(
+      points.map((p) => ({
+        timestamp: new Date(p.timestamp).toISOString(),
+        generationMW: p.generationMW,
+        sensorStatus: p.sensorStatus,
+        outage: p.outage,
+      }))
+    );
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.post('/:plantId/telemetry', async (req, res, next) => {
+  try {
+    const { plantId } = req.params;
+    if (!mongoose.isValidObjectId(plantId)) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const plantExists = await Plant.exists({ _id: plantId });
+    if (!plantExists) {
+      return res.status(404).json({ error: true, message: 'Resource not found' });
+    }
+
+    const payload = {
+      plantId,
+      timestamp: new Date(req.body.timestamp),
+      generationMW: req.body.generationMW,
+      sensorStatus: req.body.sensorStatus,
+      outage: req.body.outage,
+    };
+
+    await Telemetry.create(payload);
+    return res.status(201).send();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+export const plantsRoutes = router;

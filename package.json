@@ -1,0 +1,30 @@
+{
+  "name": "fluxcast-backend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed:admin": "node src/scripts/seedAdmin.js",
+    "test": "echo \"TODO: add jest tests\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kuldeep Solanki <ksolanki@duck.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/core": "^1.2.11",
+    "@langchain/openai": "^0.6.9",
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-openapi-validator": "^5.5.8",
+    "jsonwebtoken": "^9.0.2",
+    "langchain": "^1.5.11",
+    "mongoose": "^9.10.0",
+    "zod": "^4.1.5"
+  }
+}
